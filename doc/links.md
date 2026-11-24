@@ -2,9 +2,9 @@
 
 ## FlashDuty
 
-*不记录持延迟 废弃*
+*不支持记录延迟 废弃*
 - 监听/探测：本机 flashcat
-- 记数据：FlashDuty（组件状态 / 故障事件 / 不记录持延迟）
+- 记数据：FlashDuty（组件状态 / 故障事件 / 不支持记录延迟）
 - 提供页面：FlashDuty 状态页（play-site-dsh）
 
 - [状态页变更创建 API](https://docs.flashduty.com/zh/api-reference/on-call/status-pages/status-page-change-create)
@@ -25,7 +25,7 @@
 
 ```
 
-令牌权限参考
+// 令牌权限参考 Edit Cloudflare Workers
 Workers Agents Configuration: Edit
 Containers: Edit
 Workers Observability: Edit
@@ -42,7 +42,7 @@ Account Settings: Read
 ///
 Account - Cloudflare Pages: Edit
 Account - Workers Scripts - Edit
-Account - D1 - Edit ← 这一行是你报错的核心原因
+Account - D1 - Edit
 Account - Workers KV Storage - Edit（保险起见加上）
 Account - Account Settings - Read
 ```
