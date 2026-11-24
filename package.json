@@ -1,12 +1,13 @@
 {
-  "name": "flashcat",
+  "name": "status-observer",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24.9"
   },
   "scripts": {
-    "tunnel": "node flashcat/start-tunnel.mjs",
-    "flashcat": "node flashcat/index.mjs"
+    "local": "node src/start-local.mjs",
+    "intl": "node src/start-intl.mjs",
+    "scene": "node src/start-scene.mjs"
   }
 }

@@ -157,22 +157,46 @@ function cmdExport(jsonPath) {
   console.log(`已导出 ${payload.monitors.length} 条监控 → ${jsonPath}`)
 }
 
-function cmdImport(jsonPath) {
-  if (!fs.existsSync(jsonPath)) throw new Error(`缺少 ${jsonPath}`)
-  const payload = JSON.parse(fs.readFileSync(jsonPath, 'utf8'))
-  const monitors = payload.monitors
-  if (!Array.isArray(monitors) || monitors.length === 0) {
-    throw new Error(`${jsonPath} 中 monitors 为空`)
-  }
+export function kumaDir() {
+  return __dirname
+}
 
-  requireDataDb()
-  stopKuma()
-  const db = openDb(DATA_DB)
+export function sceneComposeEnv({ dataDir, port, project }) {
+  const name = project || 'uptime-kuma'
+  const prefixed = name !== 'uptime-kuma'
+  return {
+    ...process.env,
+    COMPOSE_PROJECT_NAME: name,
+    KUMA_NAME: prefixed ? `${name}-kuma` : 'uptime-kuma',
+    KUMA_API_NAME: prefixed ? `${name}-status-v2-api` : 'kuma-status-v2-api',
+    KUMA_PROXY_NAME: prefixed ? `${name}-status-v2-proxy` : 'kuma-status-v2-proxy',
+    KUMA_PORT: String(port || 3002),
+    KUMA_DATA: dataDir || path.join(__dirname, 'data'),
+  }
+}
+
+export function compose(args, env) {
+  execFileSync('docker', ['compose', ...args], { cwd: __dirname, env, stdio: 'inherit' })
+}
+
+export function dbHasUser(dbFile) {
+  if (!fs.existsSync(dbFile)) return false
+  const db = openDb(dbFile)
+  try {
+    const user = db.prepare('SELECT id FROM user ORDER BY id LIMIT 1').get()
+    return Boolean(user)
+  } finally {
+    db.close()
+  }
+}
+
+export function replaceMonitors(dbFile, monitors) {
+  const db = openDb(dbFile)
   const cols = tableColumns(db, 'monitor').filter((c) => c !== 'id')
   const user = db.prepare('SELECT id FROM user ORDER BY id LIMIT 1').get()
   if (!user) {
     db.close()
-    throw new Error('数据库中无用户：请先打开 http://127.0.0.1:3002/ 创建管理员，再执行 import')
+    throw new Error('数据库中无用户：请先打开页面创建管理员，再执行 import')
   }
 
   db.exec('BEGIN')
@@ -199,6 +223,19 @@ function cmdImport(jsonPath) {
     throw e
   }
   db.close()
+}
+
+function cmdImport(jsonPath) {
+  if (!fs.existsSync(jsonPath)) throw new Error(`缺少 ${jsonPath}`)
+  const payload = JSON.parse(fs.readFileSync(jsonPath, 'utf8'))
+  const monitors = payload.monitors
+  if (!Array.isArray(monitors) || monitors.length === 0) {
+    throw new Error(`${jsonPath} 中 monitors 为空`)
+  }
+
+  requireDataDb()
+  stopKuma()
+  replaceMonitors(DATA_DB, monitors)
   console.log(`已导入 ${monitors.length} 条监控 ← ${jsonPath}`)
 }
 
@@ -209,17 +246,20 @@ function cmdDeploy() {
   console.log('打开 http://127.0.0.1:3002/ ；首次需创建管理员，然后: node kuma.mjs import ./monitors.json')
 }
 
-const cmd = process.argv[2]
-const fileArg = process.argv[3]
-try {
-  if (cmd === 'export') cmdExport(resolveJsonPath(fileArg))
-  else if (cmd === 'import') cmdImport(resolveJsonPath(fileArg))
-  else if (cmd === 'deploy') cmdDeploy()
-  else {
-    usage()
-    process.exit(cmd ? 1 : 0)
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+if (isMain) {
+  const cmd = process.argv[2]
+  const fileArg = process.argv[3]
+  try {
+    if (cmd === 'export') cmdExport(resolveJsonPath(fileArg))
+    else if (cmd === 'import') cmdImport(resolveJsonPath(fileArg))
+    else if (cmd === 'deploy') cmdDeploy()
+    else {
+      usage()
+      process.exit(cmd ? 1 : 0)
+    }
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : e)
+    process.exit(1)
   }
-} catch (e) {
-  console.error(e instanceof Error ? e.message : e)
-  process.exit(1)
 }

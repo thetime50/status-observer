@@ -24,7 +24,7 @@ Account - Workers KV Storage - Edit（保险起见加上）
 Account - Account Settings - Read
 
 **2. 启动国际**
-本机先登录 `gh`。跑「启动国际」并传入该场景的 `intl` 目录。远端仓库还不存在时，命令自己做完：
+本机先登录 `gh`。跑「启动国际」并传入该场景的 `intl` 目录。仓库名默认是 `UptimeFlare-` 加场景目录名；`intl/config.mjs` 里写了仓库就用配置里的，不再推导。远端仓库还不存在时，命令自己做完：
 
 - `gh repo create` 建空仓库，不带 README（带了的话第一次 push 历史对不上）
 - 用本机 Token 执行 `gh secret set CLOUDFLARE_API_TOKEN`

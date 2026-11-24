@@ -5,16 +5,16 @@
 services:
   uptime-kuma:
     image: docker.m.daocloud.io/louislam/uptime-kuma:1
-    container_name: uptime-kuma
+    container_name: ${KUMA_NAME:-uptime-kuma}
     restart: unless-stopped
     expose:
       - '3001'
     volumes:
-      - ./data:/app/data
+      - ${KUMA_DATA:-./data}:/app/data
 
   status-v2-api:
     image: docker.m.daocloud.io/library/node:22-alpine
-    container_name: kuma-status-v2-api
+    container_name: ${KUMA_API_NAME:-kuma-status-v2-api}
     restart: unless-stopped
     working_dir: /app
     command: ['node', 'server.mjs']
@@ -23,7 +23,7 @@ services:
       KUMA_DB: /data/kuma.db
     volumes:
       - ./status-v2/server.mjs:/app/server.mjs:ro
-      - ./data:/data:ro
+      - ${KUMA_DATA:-./data}:/data:ro
     expose:
       - '3100'
     depends_on:
@@ -31,10 +31,10 @@ services:
 
   status-v2-proxy:
     image: docker.m.daocloud.io/library/nginx:alpine
-    container_name: kuma-status-v2-proxy
+    container_name: ${KUMA_PROXY_NAME:-kuma-status-v2-proxy}
     restart: unless-stopped
     ports:
-      - '3002:80'
+      - '${KUMA_PORT:-3002}:80'
     volumes:
       - ./status-v2/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./status-v2/public:/usr/share/nginx/html/status-v2:ro

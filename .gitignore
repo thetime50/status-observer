@@ -10,3 +10,4 @@ flashcat/uptimeflare-latency-stats.json
 flashcat/uptimeflare-latency-raw.json
 uptime-kuma/data/
 uptime-kuma/monitors.json
+*-sc/local/data/
