@@ -117,11 +117,16 @@ function buildRecentChartData(beats) {
   }
 }
 
+function clientTzOffset() {
+  return new Date().getTimezoneOffset()
+}
+
 async function fetchBeats(monitorId, { period, from, to } = {}) {
   const q = new URLSearchParams()
   if (from && to) {
     q.set('from', from)
     q.set('to', to)
+    q.set('tzOffset', String(clientTzOffset()))
   } else {
     q.set('period', String(period ?? 0))
   }
@@ -133,7 +138,11 @@ async function fetchBeats(monitorId, { period, from, to } = {}) {
 }
 
 async function fetchAnomalyDays(monitorId, year, month) {
-  const q = new URLSearchParams({ year: String(year), month: String(month) })
+  const q = new URLSearchParams({
+    year: String(year),
+    month: String(month),
+    tzOffset: String(clientTzOffset()),
+  })
   const res = await fetch(`/status-v2/api/anomaly-days/${monitorId}?${q}`)
   if (!res.ok) throw new Error(`anomaly-days ${res.status}`)
   const data = await res.json()
@@ -145,7 +154,7 @@ async function fetchAnomalyDays(monitorId, year, month) {
 }
 
 async function fetchDayEvents(monitorId, day) {
-  const q = new URLSearchParams({ day })
+  const q = new URLSearchParams({ day, tzOffset: String(clientTzOffset()) })
   const res = await fetch(`/status-v2/api/events/${monitorId}?${q}`)
   if (!res.ok) throw new Error(`events ${res.status}`)
   const data = await res.json()
@@ -167,9 +176,9 @@ function formatDayTitle(day) {
   return `${y}年${m}月${d}日星期${week}`
 }
 
-function todayKeyUTC() {
+function todayKey() {
   const now = new Date()
-  return dayKey(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
+  return dayKey(now.getFullYear(), now.getMonth() + 1, now.getDate())
 }
 
 function createMonitorController(monitor, initialBeats, uptimeList) {
@@ -180,8 +189,8 @@ function createMonitorController(monitor, initialBeats, uptimeList) {
     chart: null,
     rangeStart: null,
     rangeEnd: null,
-    calYear: new Date().getUTCFullYear(),
-    calMonth: new Date().getUTCMonth() + 1,
+    calYear: new Date().getFullYear(),
+    calMonth: new Date().getMonth() + 1,
     anomalyCache: new Map(),
     eventCache: new Map(),
     calendarLoaded: false,
@@ -463,7 +472,7 @@ function createMonitorController(monitor, initialBeats, uptimeList) {
     }
     const anomaly = meta.anomaly
     const dataDays = meta.dataDays
-    const today = todayKeyUTC()
+    const today = todayKey()
     const first = new Date(Date.UTC(state.calYear, state.calMonth - 1, 1))
     // Monday-first index
     const jsDay = first.getUTCDay()
@@ -602,8 +611,8 @@ function createMonitorController(monitor, initialBeats, uptimeList) {
   calendar.querySelector('.cal-today-btn').addEventListener('click', async (e) => {
     e.preventDefault()
     const now = new Date()
-    await gotoMonth(now.getUTCFullYear(), now.getUTCMonth() + 1)
-    const today = todayKeyUTC()
+    await gotoMonth(now.getFullYear(), now.getMonth() + 1)
+    const today = todayKey()
     const cell = calGrid.querySelector(`button.cal-day[data-day="${today}"]`)
     if (cell) cell.focus()
   })

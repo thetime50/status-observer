@@ -429,7 +429,7 @@ h1 {
 .cal-anomaly-ring {
   position: absolute;
   left: 50%;
-  top: 19px;
+  top: 16px;
   width: 30px;
   height: 30px;
   transform: translate(-50%, -50%);

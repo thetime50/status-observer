@@ -81,20 +81,47 @@ function fetchBeatsByPeriod(db, monitorId, periodHours) {
   return fetchBeatsByRange(db, monitorId, formatKumaTime(from), formatKumaTime(to))
 }
 
-function monthBounds(year, month) {
-  const start = `${year}-${pad(month)}-01 00:00:00.000`
-  const next =
-    month === 12
-      ? `${year + 1}-01-01 00:00:00.000`
-      : `${year}-${pad(month + 1)}-01 00:00:00.000`
+/** Date.getTimezoneOffset()：UTC+8 为 -480。缺省按 UTC。 */
+function readTzOffset(searchParams) {
+  const raw = searchParams.get('tzOffset')
+  if (raw == null || raw === '') return 0
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < -840 || n > 840) return 0
+  return Math.trunc(n)
+}
+
+function isDay(day) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(day || '')
+}
+
+/** 本地日 [00:00, 23:59:59.999] → 库内 UTC 字符串 */
+function localDayToUtcRange(day, tzOffsetMin) {
+  const [y, m, d] = day.split('-').map(Number)
+  const shift = tzOffsetMin * 60_000
+  const start = new Date(Date.UTC(y, m - 1, d, 0, 0, 0, 0) + shift)
+  const end = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999) + shift)
+  return { start: formatKumaTime(start), end: formatKumaTime(end) }
+}
+
+function utcTimeToLocalDay(timeStr, tzOffsetMin) {
+  const ms = Date.parse(String(timeStr).replace(' ', 'T') + 'Z') - tzOffsetMin * 60_000
+  const d = new Date(ms)
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`
+}
+
+function localMonthUtcBounds(year, month, tzOffsetMin) {
+  const start = localDayToUtcRange(`${year}-${pad(month)}-01`, tzOffsetMin).start
+  const nextMonth = month === 12 ? 1 : month + 1
+  const nextYear = month === 12 ? year + 1 : year
+  const next = localDayToUtcRange(`${nextYear}-${pad(nextMonth)}-01`, tzOffsetMin).start
   return { start, next }
 }
 
-function fetchAnomalyDays(db, monitorId, year, month) {
-  const { start, next } = monthBounds(year, month)
+function fetchAnomalyDays(db, monitorId, year, month, tzOffsetMin) {
+  const { start, next } = localMonthUtcBounds(year, month, tzOffsetMin)
   const rows = db
     .prepare(
-      `SELECT DISTINCT substr(time, 1, 10) AS day
+      `SELECT time
        FROM heartbeat
        WHERE monitor_id = ?
          AND status != 1
@@ -102,25 +129,26 @@ function fetchAnomalyDays(db, monitorId, year, month) {
          AND time < ?`,
     )
     .all(monitorId, start, next)
-  return rows.map((r) => r.day)
+  return [...new Set(rows.map((r) => utcTimeToLocalDay(r.time, tzOffsetMin)))]
 }
 
 /** 当月有任意心跳记录的日期（含正常） */
-function fetchDataDays(db, monitorId, year, month) {
-  const { start, next } = monthBounds(year, month)
+function fetchDataDays(db, monitorId, year, month, tzOffsetMin) {
+  const { start, next } = localMonthUtcBounds(year, month, tzOffsetMin)
   const rows = db
     .prepare(
-      `SELECT DISTINCT substr(time, 1, 10) AS day
+      `SELECT time
        FROM heartbeat
        WHERE monitor_id = ?
          AND time >= ?
          AND time < ?`,
     )
     .all(monitorId, start, next)
-  return rows.map((r) => r.day)
+  return [...new Set(rows.map((r) => utcTimeToLocalDay(r.time, tzOffsetMin)))]
 }
 
-function fetchDayEvents(db, monitorId, day) {
+function fetchDayEvents(db, monitorId, day, tzOffsetMin) {
+  const { start, end } = localDayToUtcRange(day, tzOffsetMin)
   const rows = db
     .prepare(
       `SELECT status, time, msg, important
@@ -132,7 +160,7 @@ function fetchDayEvents(db, monitorId, day) {
        ORDER BY time ASC
        LIMIT 200`,
     )
-    .all(monitorId, `${day} 00:00:00.000`, `${day} 23:59:59.999`)
+    .all(monitorId, start, end)
   return rows.map((r) => ({
     status: r.status,
     time: r.time,
@@ -158,12 +186,14 @@ const server = http.createServer((req, res) => {
         const to = searchParams.get('to')
         let beats
         if (from && to) {
-          beats = fetchBeatsByRange(
-            db,
-            monitorId,
-            `${from} 00:00:00.000`,
-            `${to} 23:59:59.999`,
-          )
+          if (!isDay(from) || !isDay(to)) {
+            json(res, 400, { ok: false, msg: 'from/to=YYYY-MM-DD required' })
+            return
+          }
+          const tzOffset = readTzOffset(searchParams)
+          const start = localDayToUtcRange(from, tzOffset).start
+          const end = localDayToUtcRange(to, tzOffset).end
+          beats = fetchBeatsByRange(db, monitorId, start, end)
         } else {
           const period = Number(searchParams.get('period') || '0')
           beats = fetchBeatsByPeriod(db, monitorId, period)
@@ -186,8 +216,9 @@ const server = http.createServer((req, res) => {
       }
       const db = openDb()
       try {
-        const days = fetchAnomalyDays(db, monitorId, year, month)
-        const dataDays = fetchDataDays(db, monitorId, year, month)
+        const tzOffset = readTzOffset(searchParams)
+        const days = fetchAnomalyDays(db, monitorId, year, month, tzOffset)
+        const dataDays = fetchDataDays(db, monitorId, year, month, tzOffset)
         json(res, 200, { ok: true, monitorId, year, month, days, dataDays })
       } finally {
         db.close()
@@ -205,7 +236,7 @@ const server = http.createServer((req, res) => {
       }
       const db = openDb()
       try {
-        const events = fetchDayEvents(db, monitorId, day)
+        const events = fetchDayEvents(db, monitorId, day, readTzOffset(searchParams))
         json(res, 200, { ok: true, monitorId, day, total: events.length, events })
       } finally {
         db.close()
