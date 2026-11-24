@@ -1,5 +1,5 @@
 /**
- * status-observer 配置模板：复制为 config.js 后填写 statusKey 等密钥。
+ * flashcat 配置模板：复制为 config.js 后填写 statusKey 等密钥。
  * sites[] 为多站点探测列表（statusName + testRequests/checks）。
  */
 /** @typedef {{ status?: number, text?: string, ms?: number, error?: Error | null }} ProbeCtx */

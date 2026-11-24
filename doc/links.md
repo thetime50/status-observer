@@ -2,8 +2,8 @@
 
 ## FlashDuty
 
-- 监听/探测：本机 status-observer
-- 记数据：FlashDuty（组件状态 / 故障事件）
+- 监听/探测：本机 flashcat
+- 记数据：FlashDuty（组件状态 / 故障事件 / 不记录持延迟）
 - 提供页面：FlashDuty 状态页（play-site-dsh）
 
 - [状态页变更创建 API](https://docs.flashduty.com/zh/api-reference/on-call/status-pages/status-page-change-create)

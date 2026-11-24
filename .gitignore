@@ -4,9 +4,9 @@ data/
 *.db
 *.db-*
 .env
-status-observer/config.js
-status-observer/.state.json
-status-observer/uptimeflare-latency-stats.json
-status-observer/uptimeflare-latency-raw.json
+flashcat/config.js
+flashcat/.state.json
+flashcat/uptimeflare-latency-stats.json
+flashcat/uptimeflare-latency-raw.json
 uptime-kuma/data/
 uptime-kuma/monitors.json

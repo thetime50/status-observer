@@ -68,7 +68,7 @@ async function probe(url, timeoutMs) {
       method: 'GET',
       redirect: 'follow',
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { 'user-agent': 'cloud-dsh-status-observer/0.1' },
+      headers: { 'user-agent': 'cloud-dsh-flashcat/0.1' },
     })
     const text = await res.text()
     return { status: res.status, text, ms: Date.now() - started, error: null }

@@ -1,12 +1,12 @@
 {
-  "name": "status-observer",
+  "name": "flashcat",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24.9"
   },
   "scripts": {
-    "tunnel": "node status-observer/start-tunnel.mjs",
-    "status-observer": "node status-observer/index.mjs"
+    "tunnel": "node flashcat/start-tunnel.mjs",
+    "flashcat": "node flashcat/index.mjs"
   }
 }

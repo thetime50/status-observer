@@ -63,7 +63,7 @@ export async function resolveComponentId(apiBase, statusKey, pageId, statusName)
       components: [
         {
           name: statusName,
-          description: 'cloud-dsh status-observer 自动创建',
+          description: 'cloud-dsh flashcat 自动创建',
         },
       ],
     },
