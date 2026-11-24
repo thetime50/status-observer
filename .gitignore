@@ -1,0 +1,12 @@
+node_modules/
+data/
+*.log
+*.db
+*.db-*
+.env
+status-observer/config.js
+status-observer/.state.json
+status-observer/uptimeflare-latency-stats.json
+status-observer/uptimeflare-latency-raw.json
+uptime-kuma/data/
+uptime-kuma/monitors.json

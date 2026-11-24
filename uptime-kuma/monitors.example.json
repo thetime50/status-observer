@@ -1,0 +1,46 @@
+{
+  "exportedAt": "2026-11-24",
+  "note": "脱敏示例：复制为 monitors.json 后填写真实 URL/账号，再 node kuma.mjs import ./monitors.json",
+  "admin": {
+    "username": "admin",
+    "password": "REPLACE_PASSWORD"
+  },
+  "monitors": [
+    {
+      "name": "example-api",
+      "active": 1,
+      "interval": 120,
+      "url": "https://example.com/api/xx",
+      "type": "keyword",
+      "keyword": "ok",
+      "maxretries": 0,
+      "ignore_tls": 0,
+      "upside_down": 0,
+      "maxredirects": 10,
+      "accepted_statuscodes_json": "[\"200-299\"]",
+      "retry_interval": 120,
+      "method": "GET",
+      "expiry_notification": 0,
+      "invert_keyword": 0,
+      "timeout": 48
+    },
+    {
+      "name": "example-tunnel",
+      "active": 1,
+      "interval": 120,
+      "url": "https://xxxx.trycloudflare.com/api/xx",
+      "type": "keyword",
+      "keyword": "[",
+      "maxretries": 0,
+      "ignore_tls": 0,
+      "upside_down": 0,
+      "maxredirects": 10,
+      "accepted_statuscodes_json": "[\"200-299\"]",
+      "retry_interval": 120,
+      "method": "GET",
+      "expiry_notification": 0,
+      "invert_keyword": 0,
+      "timeout": 48
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+# 本机 Uptime Kuma + status-v2 同端口反代（默认 http://127.0.0.1:3002）
+# - /status-v2/api/ → 只读 BFF（kuma.db）
+# - /status-v2/     → 旁路状态页 v2
+# - 其余路径        → 官方 Uptime Kuma
+services:
+  uptime-kuma:
+    image: docker.m.daocloud.io/louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    expose:
+      - '3001'
+    volumes:
+      - ./data:/app/data
+
+  status-v2-api:
+    image: docker.m.daocloud.io/library/node:22-alpine
+    container_name: kuma-status-v2-api
+    restart: unless-stopped
+    working_dir: /app
+    command: ['node', 'server.mjs']
+    environment:
+      PORT: '3100'
+      KUMA_DB: /data/kuma.db
+    volumes:
+      - ./status-v2/server.mjs:/app/server.mjs:ro
+      - ./data:/data:ro
+    expose:
+      - '3100'
+    depends_on:
+      - uptime-kuma
+
+  status-v2-proxy:
+    image: docker.m.daocloud.io/library/nginx:alpine
+    container_name: kuma-status-v2-proxy
+    restart: unless-stopped
+    ports:
+      - '3002:80'
+    volumes:
+      - ./status-v2/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./status-v2/public:/usr/share/nginx/html/status-v2:ro
+    depends_on:
+      - uptime-kuma
+      - status-v2-api

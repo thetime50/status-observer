@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Status v2</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <p class="eyebrow">Status v2 · 旁路页（周期下拉 + 事件日历）</p>
+        <h1 id="title">加载中…</h1>
+        <p id="meta" class="meta"></p>
+      </header>
+      <div id="incident" class="incident" hidden></div>
+      <div id="groups"></div>
+      <p id="error" class="error" hidden></p>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

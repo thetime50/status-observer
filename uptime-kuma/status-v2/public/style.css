@@ -1,0 +1,510 @@
+:root {
+  --bg: #f5f7f6;
+  --card: #ffffff;
+  --text: #1f2a24;
+  --muted: #6b7c72;
+  --border: #d9e2dc;
+  --up: #4abf74;
+  --down: #dc3545;
+  --pending: #f5b617;
+  --maint: #1747f5;
+  --shadow: 0 8px 24px rgba(31, 42, 36, 0.08);
+  --cal-muted: rgba(107, 124, 114, 0.55);
+  --cal-panel: rgba(241, 245, 243, 0.9);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at top left, #e8f6ee 0, transparent 42%),
+    linear-gradient(180deg, #eef3f0 0%, var(--bg) 40%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.incident {
+  background: #fff4e5;
+  border: 1px solid #f0c36d;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.group {
+  margin-bottom: 28px;
+}
+
+.group h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.monitor {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.monitor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.monitor-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.up {
+  background: rgba(74, 191, 116, 0.15);
+  color: #1f7a45;
+}
+
+.badge.down {
+  background: rgba(220, 53, 69, 0.12);
+  color: #a11f2e;
+}
+
+.badge.pending {
+  background: rgba(245, 182, 23, 0.18);
+  color: #8a6500;
+}
+
+.badge.maint {
+  background: rgba(23, 71, 245, 0.12);
+  color: #1747f5;
+}
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.heartbeat-bar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.heartbeat-bar span {
+  flex: 1 1 0;
+  min-width: 3px;
+  border-radius: 2px;
+  background: #cfd8d3;
+}
+
+.heartbeat-bar span.up {
+  background: var(--up);
+}
+
+.heartbeat-bar span.down {
+  background: var(--down);
+}
+
+.heartbeat-bar span.pending {
+  background: var(--pending);
+}
+
+.heartbeat-bar span.maint {
+  background: var(--maint);
+}
+
+.shadow-box.big-padding.text-center.ping-chart-wrapper {
+  position: relative;
+  background: #fbfcfb;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px 8px;
+  margin: 8px 0 12px;
+  text-align: center;
+}
+
+.period-options {
+  float: right;
+  position: relative;
+  z-index: 10;
+  margin: 0 4px -1.2em 0;
+}
+
+.period-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.period-current {
+  display: none;
+}
+
+.period-select {
+  width: unset;
+  display: inline-flex;
+  border: 0;
+  background: transparent;
+  color: #5c7cfa;
+  opacity: 0.85;
+  font-size: 0.9em;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.period-select:hover {
+  opacity: 1;
+}
+
+.chart-caption {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--muted);
+  clear: both;
+  padding-top: 4px;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 220px;
+  clear: both;
+}
+
+/* FlashDuty-like event calendar shell */
+.event-calendar-card {
+  border: none;
+  border-radius: 12px;
+  background: var(--cal-panel);
+  padding: 4px;
+  margin-top: 4px;
+}
+
+.event-calendar-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.event-calendar-summary::-webkit-details-marker {
+  display: none;
+}
+
+.event-calendar-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  transform: rotate(-90deg);
+  transition: transform 0.18s ease;
+}
+
+.event-calendar-card[open] > .event-calendar-summary .event-calendar-hint {
+  transform: rotate(90deg);
+}
+
+.event-calendar-body {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 8px 14px;
+  min-height: 220px;
+}
+
+.event-calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.cal-nav {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.cal-nav:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.cal-title {
+  min-width: 110px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cal-today-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #3b5bdb;
+  border-radius: 8px;
+  padding: 2px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  height: 28px;
+}
+
+.cal-today-btn:hover {
+  background: rgba(59, 91, 219, 0.08);
+}
+
+.cal-range-hint,
+.cal-status {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 8px;
+  min-height: 1.2em;
+}
+
+.cal-weekdays,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 4px;
+}
+
+.cal-weekdays {
+  gap: 2px;
+  border-bottom: 1px solid rgba(217, 226, 220, 0.9);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.cal-grid {
+  gap: 4px 0;
+}
+
+.cal-weekdays div {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.cal-day {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0; /* 4px 0 4px; */
+  cursor: pointer;
+  border-radius: 0;
+  /* min-height: 40px; */
+}
+
+.cal-day:hover:not(:disabled):not(.in-range) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.cal-day:disabled {
+  cursor: default;
+}
+
+.cal-day-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 30px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.cal-day.outside .cal-day-inner {
+  color: rgba(107, 124, 114, 0.48);
+}
+
+/* 有监控数据的日期：墨绿色 */
+.cal-day.has-data .cal-day-inner {
+  color: var(--up);
+  font-weight: 600;
+}
+
+.cal-day.has-data.in-range .cal-day-inner {
+  color: var(--up);
+}
+
+/* 连续选中条：矩形，仅首尾圆角 */
+.cal-day.in-range {
+  background: rgba(92, 124, 250, 0.16);
+}
+
+.cal-day.range-start {
+  border-radius: 16px 0 0 16px;
+}
+
+.cal-day.range-end {
+  border-radius: 0 16px 16px 0;
+}
+
+.cal-day.range-start.range-end {
+  border-radius: 16px;
+}
+
+.cal-day.in-range .cal-day-inner {
+  font-weight: 600;
+}
+
+.cal-day.range-start .cal-day-inner,
+.cal-day.range-end .cal-day-inner {
+  font-weight: 700;
+}
+
+.cal-anomaly-ring {
+  position: absolute;
+  left: 50%;
+  top: 19px;
+  width: 30px;
+  height: 30px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  border: 2px solid #ef4444;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cal-today-dot {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #3b82f6;
+  z-index: 2;
+}
+
+.cal-popover {
+  position: absolute;
+  z-index: 30;
+  width: 240px;
+  pointer-events: auto;
+}
+
+.cal-popover-card {
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.cal-popover-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cal-popover-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cal-popover-list li {
+  margin: 0 0 4px;
+  color: #e5e7eb;
+}
+
+.cal-popover-more {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.error {
+  color: #a11f2e;
+  background: #fdecef;
+  border: 1px solid #f5c2c7;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 550px) {
+  .shadow-box.big-padding.text-center.ping-chart-wrapper {
+    padding: 10px !important;
+  }
+
+  .chart-wrap {
+    height: 260px;
+  }
+}
