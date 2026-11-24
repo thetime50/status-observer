@@ -2,6 +2,7 @@
 
 ## FlashDuty
 
+*不记录持延迟 废弃*
 - 监听/探测：本机 flashcat
 - 记数据：FlashDuty（组件状态 / 故障事件 / 不记录持延迟）
 - 提供页面：FlashDuty 状态页（play-site-dsh）
@@ -21,6 +22,30 @@
 - [Cloudflare API 令牌](https://dash.cloudflare.com/profile/api-tokens)
 - [UptimeFlare-Cloud-DSH 仓库](https://github.com/thetime50/UptimeFlare-Cloud-DSH)
 - [UptimeFlare 状态页](https://uptimeflare-56u.pages.dev/)
+
+```
+
+令牌权限参考
+Workers Agents Configuration: Edit
+Containers: Edit
+Workers Observability: Edit
+Workers Builds Configuration: Edit
+D1: Read
+D1: Edit
+Cloudflare Pages: Edit
+Workers R2 Storage: Edit
+Workers Tail: Read
+Workers KV Storage: Edit
+Workers Scripts: Edit
+Account Settings: Read
+
+///
+Account - Cloudflare Pages: Edit
+Account - Workers Scripts - Edit
+Account - D1 - Edit ← 这一行是你报错的核心原因
+Account - Workers KV Storage - Edit（保险起见加上）
+Account - Account Settings - Read
+```
 
 ## Uptime Kuma
 本机监控 status没有小时数据
